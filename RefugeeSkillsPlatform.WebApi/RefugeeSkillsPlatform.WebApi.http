@@ -1,0 +1,6 @@
+@RefugeeSkillsPlatform.WebApi_HostAddress = http://localhost:5036
+
+GET {{RefugeeSkillsPlatform.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
