@@ -1,0 +1,73 @@
+﻿using Microsoft.Data.SqlClient;
+using RefugeeSkillsPlatform.Core.DTOs;
+using RefugeeSkillsPlatform.Core.Entities;
+using RefugeeSkillsPlatform.Core.Interfaces;
+using RefugeeSkillsPlatform.Core.Interfaces.Services;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
+{
+    public class ProviderService : IProviderService
+    {
+       private readonly IUnitOfWork _unitOfWork;
+        public ProviderService(IUnitOfWork unitOfWrok)
+        {
+            _unitOfWork = unitOfWrok;
+        }
+        public int CreateSerice(ServiceRequest request)
+        {
+            
+            var service = new RefugeeSkillsPlatform.Core.Entities.Services()
+            {
+                ServiceName = request.ServiceName,
+                Description = request.Description,
+                CategoryId = request.CategoryId,
+                CreatedByUserId = request.CreatedByUserId,
+                DeliveryMethodId = request.DeliveryMethodId,
+                IsApproved = false,
+                CreatedOn = DateTime.UtcNow
+            };
+            if(service is null)
+            {
+                return 0;
+            }
+            _unitOfWork.GetRepository<RefugeeSkillsPlatform.Core.Entities.Services>().Add(service);
+            var result = _unitOfWork.Commit();
+            return result;
+        }
+        public int CreateSlots(AvailabilitySlotsDTO request)
+        {
+            var slot = new AvailabilitySlots() {
+            ServiceId = request.ServiceId,
+            SlotStartDate = request.SlotStartDate,
+            SlotEndDate = request.SlotEndDate,
+            StartTime = request.StartTime,
+            EndTime = request.EndTime
+            };
+            if(slot is null)
+            {
+                return 0;
+            }
+            _unitOfWork.GetRepository<AvailabilitySlots>().Add(slot);
+            var result = _unitOfWork.Commit();
+            return result;
+
+        }
+
+        public List<ServiceResponse> GetAllServices(AllServicesRequest request)
+        {
+            var pageNumParam = new SqlParameter("@PageNumber", SqlDbType.Int) { Value = request.PageNumber };
+            var pageSizeParam = new SqlParameter("@PageSize", SqlDbType.Int) { Value = request.PageSize };
+            var userId = new SqlParameter("@UserId", SqlDbType.Int) { Value = (object?)request.UserId ?? DBNull.Value };
+            var services = _unitOfWork.SpListRepository<ServiceResponse>(
+           "sp_GetAllServices @PageNumber, @PageSize, @UserId", pageNumParam, pageSizeParam,userId);
+
+            return services.Any() ? services : new List<ServiceResponse>();
+        }
+    }
+}
