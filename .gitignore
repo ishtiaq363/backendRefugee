@@ -1,0 +1,43 @@
+# Visual Studio cache and settings
+.vs/
+*.user
+*.suo
+
+# Build results
+bin/
+obj/
+Debug/
+Release/
+
+# Logs
+*.log
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+
+# Resharper / Rider
+*.DotSettings.user
+
+# IIS Express
+.vscode/
+.vscode/*
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# Node (Angular/React frontend)
+node_modules/
+dist/
+build/
+
+# Environment files (keep them local)
+.env
+*.env
+
+# Others
+*.db
+*.sqlite
+*.mdb
