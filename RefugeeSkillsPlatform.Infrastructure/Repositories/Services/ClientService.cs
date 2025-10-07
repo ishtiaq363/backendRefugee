@@ -61,7 +61,8 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
                 SlotStartDate = request.SlotStartDate,
                 SlotEndDate = request.SlotEndDate,
                 Status = request.Status,
-                BookingDate = request.BookingDate
+                BookingDate = request.BookingDate,
+                ZoomLink = request.ZoomLink
             };
 
             _unitOfWork.GetRepository<Bookings>().Add(newBooking);
@@ -81,5 +82,26 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 
             return services.Any() ? services : new List<ServiceSlotResponse>();
         }
+
+        public int CreatePayment(PaymentDto request)
+        {
+            var result = _unitOfWork.GetRepository<Payments>().FirstOrDefult(p => p.BookingId == request.BookingId);
+            if (result != null)
+            {
+                return 0;
+            }
+            var payment = new Payments()
+            {
+                BookingId = request.BookingId,
+                Amount = request.Amount,
+                PaymentDate = request.PaymentDate,
+                PaymentStatus = "Paid",
+                TransactionReference = request.TransactionReference,
+                PaymentMethod = request.PaymentMethod
+            };
+            _unitOfWork.GetRepository<Payments>().Add(payment);
+            return _unitOfWork.Commit();
+        }
+
     }
 }

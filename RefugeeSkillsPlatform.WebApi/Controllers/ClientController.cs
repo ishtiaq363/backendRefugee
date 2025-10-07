@@ -64,5 +64,27 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
 
             });
         }
+
+        [HttpPost]
+        public IActionResult CreatePayment(PaymentDto request)
+        {
+            if (_clientService.CreatePayment(request) == 0)
+            {
+                return Ok(new StandardRequestResponse<int>()
+                {
+                    Message = "Failed to make a Payment",
+                    Status = 401,
+                    Data = 0,
+                    Success = false,
+                });
+            }
+            return Ok(new StandardRequestResponse<int>()
+            {
+                Message = "Payment done successfully",
+                Status = 200,
+                Data = 1,
+                Success= true
+            });
+        }
     }
 }

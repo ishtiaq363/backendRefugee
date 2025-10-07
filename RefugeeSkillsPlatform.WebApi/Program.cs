@@ -41,6 +41,16 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>
 builder.Services.AddDbContext<RefugeeSkillsDbContext>(options => { 
 options.UseSqlServer(dbConnection);
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:4200") // Angular dev server
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 var app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.Use(async (context, next) =>
@@ -67,6 +77,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseCors("AllowAngularApp");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

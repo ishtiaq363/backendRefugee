@@ -22,6 +22,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Persistence
         public DbSet<Roles> Roles { get; set; }
         public DbSet<AvailabilitySlots> AvailabilitySlots { get; set; }
         public DbSet<Bookings> Bookings { get; set; }
+        public DbSet<Payments> Payments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

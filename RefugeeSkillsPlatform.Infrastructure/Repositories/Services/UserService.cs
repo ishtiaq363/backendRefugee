@@ -112,23 +112,50 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 
         public UserProfileResponse? VerifyUser(Credentials request)
         {
-            var userProfileResponse = _unitOfWork.GetRepository<Users>().FirstOrDefult(x => x.UserName == request.UserName && x.PasswordHash ==request.Password);
-            if (userProfileResponse != null)
+            var user = _unitOfWork.GetRepository<Users>()
+                .FirstOrDefult(x => x.UserName == request.UserName
+                                  && x.PasswordHash == request.Password);
+
+            if (user == null)
+                return null;
+
+            // Get the role name by RoleId
+            var roleName = _unitOfWork.GetRepository<Roles>()
+                .GetAll()
+                .Where(r => r.RoleId == user.RoleId)
+                .Select(r => r.RoleName)
+                .FirstOrDefault();
+
+            return new UserProfileResponse()
             {
-                return new UserProfileResponse()
-                {
-                    Email = userProfileResponse.Email,
-                    UserName = userProfileResponse.UserName,
-                    FirstName = userProfileResponse.FirstName,
-                    LastName = userProfileResponse.LastName,
-                };
-            }
-            else
-            {
-                return null;// new UserProfileResponse() { };
-            }
+                Email = user.Email,
+                UserName = user.UserName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                RoleName = roleName
+            };
         }
 
-        
+
+        //public UserProfileResponse? VerifyUser(Credentials request)
+        //{
+        //    var userProfileResponse = _unitOfWork.GetRepository<Users>().FirstOrDefult(x => x.UserName == request.UserName && x.PasswordHash ==request.Password);
+        //    if (userProfileResponse != null)
+        //    {
+        //        return new UserProfileResponse()
+        //        {
+        //            Email = userProfileResponse.Email,
+        //            UserName = userProfileResponse.UserName,
+        //            FirstName = userProfileResponse.FirstName,
+        //            LastName = userProfileResponse.LastName,
+        //        };
+        //    }
+        //    else
+        //    {
+        //        return null;// new UserProfileResponse() { };
+        //    }
+        //}
+
+
     }
 }
