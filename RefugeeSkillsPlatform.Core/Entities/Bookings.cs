@@ -32,6 +32,7 @@ namespace RefugeeSkillsPlatform.Core.Entities
         [Required]
         [MaxLength(20)]
         public string Status { get; set; } = "Pending"; // Pending, Confirmed, Cancelled
+        public string? ZoomLink { get; set; } = string.Empty;
 
         [Required]
         public DateTime BookingDate { get; set; } = DateTime.Now;
