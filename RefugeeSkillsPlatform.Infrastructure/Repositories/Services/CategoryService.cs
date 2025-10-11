@@ -17,7 +17,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
         {
             _unitOfWork = unitOfWork;
         }
-        public IEnumerable<CategoryResponse> GetCategories()
+        public List<CategoryResponse> GetCategories()
         {
             try
             {
@@ -31,7 +31,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             }
             catch (Exception ex)
             {
-                return Enumerable.Empty<CategoryResponse>();
+                return new List<CategoryResponse>();
             }
         }
 
