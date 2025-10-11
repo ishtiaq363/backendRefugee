@@ -29,24 +29,29 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 
         public bool ProviderApproval(ApprovalRequest request)
         {
-            var user = _unitOfWork.GetRepository<Users>().FirstOrDefult(x => x.Email == request.Email);
+            var repo = _unitOfWork.GetRepository<Users>();
+            var user = repo.FirstOrDefult(x => x.Email == request.Email);
             if(user == null)
             {
                 return false;
             }
-            user.IsApproved = true;
+            user.IsApproved = request.isApproved;
+            repo.Update(user);
             _unitOfWork.Commit();
+
             return true;
 
         }
         public bool ServiceApproval(ServiceApprovalRequest request)
         {
-            var service = _unitOfWork.GetRepository<RefugeeSkillsPlatform.Core.Entities.Services>().FirstOrDefult(x => x.ServiceId == request.ServiceId);
+            var repo = _unitOfWork.GetRepository<RefugeeSkillsPlatform.Core.Entities.Services>();
+            var service = repo.FirstOrDefult(x => x.ServiceId == request.ServiceId);
             if(service ==null)
             {
                 return false;
             }
             service.IsApproved = true;
+            repo.Update(service);
             _unitOfWork.Commit();
             return true;
         }

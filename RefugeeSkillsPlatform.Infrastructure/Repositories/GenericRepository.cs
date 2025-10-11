@@ -36,6 +36,11 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories
             return dbSet.FirstOrDefault(predicate);
         }
 
+        public void Update(T entity)
+        {
+            dbSet.Update(entity);
+        }
+
 
     }
 }
