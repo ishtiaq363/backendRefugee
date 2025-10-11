@@ -64,7 +64,8 @@ namespace RefugeeSkillsPlatform.Core.DTOs
 
     public class ApprovalRequest
     {
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public bool isApproved { get; set; } = false;
     }
 
     public class ServiceApprovalRequest

@@ -109,5 +109,28 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
             });
         }
 
+        [HttpPost]
+        public IActionResult GetAllBookings([FromBody] AllBookingsRequest request)
+        {
+            var bookingList = _providerService.GetBookingList(request);
+            if (bookingList == null || bookingList.Count == 0)
+            {
+                return NotFound(new StandardRequestResponse<List<BookingListDto>>()
+                {
+                    Data = null,
+                    Status = 404,
+                    Success = false,
+                    Message = "No record to show"
+                });
+            }
+            return Ok(new StandardRequestResponse<List<BookingListDto>>()
+            {
+                Data = bookingList,
+                Status = 200,
+                Success = true,
+                Message = "Successfully retrieve the Users"
+            });
+
+        }
     }
 }

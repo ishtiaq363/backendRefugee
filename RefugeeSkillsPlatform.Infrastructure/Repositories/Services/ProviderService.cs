@@ -69,5 +69,16 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 
             return services.Any() ? services : new List<ServiceResponse>();
         }
+
+        public List<BookingListDto> GetBookingList(AllBookingsRequest request)
+        {
+            var pageNumParam = new SqlParameter("@PageNumber", SqlDbType.Int) { Value = request.PageNumber };
+            var pageSizeParam = new SqlParameter("@PageSize", SqlDbType.Int) { Value = request.PageSize };
+            var bookingId = new SqlParameter("@BookingId", SqlDbType.BigInt) { Value = (object?)request.BookingId ?? DBNull.Value };
+            var services = _unitOfWork.SpListRepository<BookingListDto>(
+           "Sp_GetAllBookings @PageNumber, @PageSize, @BookingId", pageNumParam, pageSizeParam, bookingId);
+
+            return services.Any() ? services : new List<BookingListDto>();
+        }
     }
 }

@@ -11,6 +11,7 @@ namespace RefugeeSkillsPlatform.Core.Interfaces.Services
     {
         int CreateSerice(ServiceRequest request);
         List<ServiceResponse> GetAllServices(AllServicesRequest request);
+        List<BookingListDto> GetBookingList(AllBookingsRequest request);
         int CreateSlots(AvailabilitySlotsDTO request);
 
     }

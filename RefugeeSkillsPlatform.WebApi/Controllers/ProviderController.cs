@@ -68,5 +68,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                 });
             }
         }
+
+        //sp for getting all bookings =  Sp_GetAllBookings
     }
 }
