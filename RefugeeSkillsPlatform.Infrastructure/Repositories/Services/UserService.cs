@@ -50,7 +50,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             {
                 return false;
             }
-            service.IsApproved = true;
+            service.IsApproved = request.IsApproved;
             repo.Update(service);
             _unitOfWork.Commit();
             return true;
