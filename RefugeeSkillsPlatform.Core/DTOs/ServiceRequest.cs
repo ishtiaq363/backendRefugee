@@ -52,6 +52,7 @@ namespace RefugeeSkillsPlatform.Core.DTOs
         public DateTime? CreatedOn { get; set; }
         public bool? IsApproved { get; set; }
         public long RowNum { get; set; }   // comes from ROW_NUMBER()
+        public string? Logo { get; set; }
     }
     
     public class AvailabilitySlotsDTO

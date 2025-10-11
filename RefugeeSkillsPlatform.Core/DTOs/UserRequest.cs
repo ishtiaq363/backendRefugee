@@ -71,6 +71,7 @@ namespace RefugeeSkillsPlatform.Core.DTOs
     public class ServiceApprovalRequest
     {
         public long ServiceId { get; set; }
+        public bool IsApproved { get; set; } = false;
     }
 
 }
