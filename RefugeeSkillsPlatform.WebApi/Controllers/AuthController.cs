@@ -65,6 +65,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                 var expiresAt = DateTime.UtcNow.AddMinutes(30);
                 return Ok(new
                 {
+                    user_id = userProfile.UserId,
                     access_token = CreateToken(claims, expiresAt),
                     expires_at = expiresAt,
                 });

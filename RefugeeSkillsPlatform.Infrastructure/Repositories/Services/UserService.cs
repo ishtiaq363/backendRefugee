@@ -128,6 +128,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 
             return new UserProfileResponse()
             {
+                UserId = user.UserId,
                 Email = user.Email,
                 UserName = user.UserName,
                 FirstName = user.FirstName,

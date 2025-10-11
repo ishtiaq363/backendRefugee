@@ -10,7 +10,7 @@ namespace RefugeeSkillsPlatform.Core.Interfaces.Services
 {
     public interface ICategoryService
     {
-        IEnumerable<CategoryResponse> GetCategories();
+        List<CategoryResponse> GetCategories();
       
     }
 }

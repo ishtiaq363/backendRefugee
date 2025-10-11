@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using RefugeeSkillsPlatform.Core.DTOs;
 using RefugeeSkillsPlatform.Core.Interfaces.Services;
+using RefugeeSkillsPlatform.WebApi.Common;
 
 namespace RefugeeSkillsPlatform.WebApi.Controllers
 {
@@ -16,8 +18,22 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
         [HttpGet]
         public IActionResult GetCategories()
         {
-            return Ok(_categoryService.GetCategories());
+            var categoriesResponse = _categoryService.GetCategories();
+            if (categoriesResponse == null)
+            {
+                return Ok(new StandardRequestResponse<List<CategoryResponse>>() { Data = null, Success = false, Message = "Internal Server Error", Status = 500 }
+                    );
+            }
+            return Ok(new StandardRequestResponse<List<CategoryResponse>>()
+            {
+                Data = categoriesResponse,
+                Message = "Successfully fetch methods",
+                Success = true,
+                Status = 200
+            });
+
+            //return Ok(_categoryService.GetCategories());
         }
-        
+
     }
 }
