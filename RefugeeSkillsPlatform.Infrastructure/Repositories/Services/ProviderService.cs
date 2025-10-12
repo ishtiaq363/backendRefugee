@@ -80,5 +80,15 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 
             return services.Any() ? services : new List<BookingListDto>();
         }
+
+        public bool IsAccountApproved(int providerId)
+        {
+            var provider = _unitOfWork.GetRepository<Users>().FirstOrDefult(u => u.UserId == providerId);
+            if (provider != null)
+            {
+                return provider.IsApproved;
+            }
+            return false;
+        }
     }
 }

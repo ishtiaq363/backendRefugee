@@ -70,5 +70,19 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
         }
 
         //sp for getting all bookings =  Sp_GetAllBookings
+
+        // Check Account Approved or Not
+        [HttpGet]
+        public IActionResult IsAccountApproved(int providerId)
+        {
+            var isApproved = _providerService.IsAccountApproved(providerId);
+            return Ok(new StandardRequestResponse<bool>()
+            {
+                Data = isApproved,
+                Message = isApproved ? "Account is approved" : "Account is not approved",
+                Status = 200,
+                Success = true
+            });
+        }
     }
 }
