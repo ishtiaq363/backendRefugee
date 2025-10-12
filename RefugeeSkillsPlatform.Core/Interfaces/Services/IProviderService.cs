@@ -14,5 +14,7 @@ namespace RefugeeSkillsPlatform.Core.Interfaces.Services
         List<BookingListDto> GetBookingList(AllBookingsRequest request);
         int CreateSlots(AvailabilitySlotsDTO request);
 
+        bool IsAccountApproved(int providerId);
+
     }
 }
