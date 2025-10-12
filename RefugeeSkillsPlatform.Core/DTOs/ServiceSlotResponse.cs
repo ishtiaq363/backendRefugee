@@ -33,11 +33,11 @@ namespace RefugeeSkillsPlatform.Core.DTOs
 
     public class BookingDTO
     {
-        public long BookingId { get; set; }
+        public long? BookingId { get; set; }
         [Required]
         public long AvailabilitySlotId { get; set; }
         [Required]
-        public long ClientId { get; set; }
+        public string Email { get; set; }
         [Required]
         public TimeSpan BookingStart { get; set; }
 
@@ -61,6 +61,7 @@ namespace RefugeeSkillsPlatform.Core.DTOs
     {
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
+        public long? ServiceId { get; set; }
     }
 
 
