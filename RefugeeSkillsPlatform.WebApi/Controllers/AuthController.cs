@@ -58,6 +58,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                 var claims = new List<Claim>() {
                 new Claim (ClaimTypes.Name, userProfile.UserName),
                 new Claim( ClaimTypes.Email, userProfile.Email),
+                new Claim("email", userProfile.Email),
                 new Claim( "role", userProfile.RoleName)
                 };
 

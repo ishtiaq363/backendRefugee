@@ -16,7 +16,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
         {
             _clientService = clientService;
         }
-        [HttpGet]
+        [HttpPost]
         public IActionResult GetAllAvailableServiceSlots(ServiceSlotRequest request)
         {
             var result =  _clientService.GetServiceSlots(request);
@@ -40,6 +40,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
 
             });
         }
+       
         [HttpPost]
         public IActionResult Booking([FromBody] BookingDTO request)
         {
@@ -50,7 +51,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                     Data = false,
                     Success = false,
                     Status = 401,
-                    Message = "Booking Failed"
+                    Message = "Booking Failed, already booked"
 
                 });
 

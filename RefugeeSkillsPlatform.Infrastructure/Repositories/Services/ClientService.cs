@@ -23,18 +23,8 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 
         public bool CreateBooking(BookingDTO request)
         {
-            // Check if any booking already exists for the same slot and overlapping times
-            //var isAlreadyBooked = _unitOfWork.GetRepository<Bookings>().GetAll().ToList()
-            //    .Any(x => x.AvailabilitySlotId == request.AvailabilitySlotId &&
-            //              x.SlotStartDate == request.SlotStartDate &&
-            //              x.SlotEndDate == request.SlotEndDate &&
-            //              (
-            //                  (request.BookingStart >= x.BookingStart && request.BookingStart < x.BookingEnd) ||
-            //                  (request.BookingEnd > x.BookingStart && request.BookingEnd <= x.BookingEnd) ||
-            //                  (request.BookingStart <= x.BookingStart && request.BookingEnd >= x.BookingEnd) // new booking fully overlaps existing
-            //              )
-            //    );
-                        var isAlreadyBooked = _unitOfWork.GetRepository<Bookings>().GetAll().Any(x =>
+            
+                var isAlreadyBooked = _unitOfWork.GetRepository<Bookings>().GetAll().Any(x =>
                 x.AvailabilitySlotId == request.AvailabilitySlotId &&
                 x.SlotStartDate.Date == request.SlotStartDate.Date &&
                 x.SlotEndDate.Date == request.SlotEndDate.Date &&
@@ -42,7 +32,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
                     (request.BookingStart >= x.BookingStart && request.BookingStart < x.BookingEnd) ||
                     (request.BookingEnd > x.BookingStart && request.BookingEnd <= x.BookingEnd) ||
                     (request.BookingStart <= x.BookingStart && request.BookingEnd >= x.BookingEnd) ||
-                    (x.BookingStart == x.BookingEnd && request.BookingStart == x.BookingStart) // exact match case
+                    (x.BookingStart == x.BookingEnd && request.BookingStart == x.BookingStart) 
                 )
             );
 
@@ -51,11 +41,16 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             if (isAlreadyBooked)
                 return false; // booking conflict
 
+            var client = _unitOfWork.GetRepository<Users>().FirstOrDefult(u => u.Email == request.Email);
+            if (client is null)
+            {
+                throw new InvalidOperationException("Client not found for the provided email.");
+            }
             // If not already booked, save the booking
             var newBooking = new Bookings
             {
                 AvailabilitySlotId = request.AvailabilitySlotId,
-                ClientId = request.ClientId,
+                ClientId = client.UserId,
                 BookingStart = request.BookingStart,
                 BookingEnd = request.BookingEnd,
                 SlotStartDate = request.SlotStartDate,
@@ -76,12 +71,18 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
         {
             var pageNumParam = new SqlParameter("@PageNumber", SqlDbType.Int) { Value = request.PageNumber };
             var pageSizeParam = new SqlParameter("@PageSize", SqlDbType.Int) { Value = request.PageSize };
-            // var userId = new SqlParameter("@UserId", SqlDbType.Int) { Value = (object?)request.UserId ?? DBNull.Value };
+            var serviceIdParam = new SqlParameter("@ServiceId", SqlDbType.Int)
+            {
+                Value = request.ServiceId.HasValue ? (object)request.ServiceId.Value : DBNull.Value
+            };
+
             var services = _unitOfWork.SpListRepository<ServiceSlotResponse>(
-           "sp_GetAllServiceSlots @PageNumber, @PageSize", pageNumParam, pageSizeParam);
+                "sp_GetAllServiceSlots @PageNumber, @PageSize, @ServiceId",
+                 pageNumParam, pageSizeParam, serviceIdParam);
 
             return services.Any() ? services : new List<ServiceSlotResponse>();
         }
+
 
         public int CreatePayment(PaymentDto request)
         {
@@ -101,6 +102,22 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             };
             _unitOfWork.GetRepository<Payments>().Add(payment);
             return _unitOfWork.Commit();
+        }
+
+        public List<BookedSlotResponse> GetBookedSlots(int availabilitySlotId, DateTime date)
+        {
+            var bookings = _unitOfWork.GetRepository<Bookings>()
+                .GetAll()
+                .Where(b => b.AvailabilitySlotId == availabilitySlotId
+                            && b.BookingDate.Date == date.Date)
+                .Select(b => new BookedSlotResponse
+                {
+                    BookingStart = b.BookingStart,
+                    BookingEnd = b.BookingEnd
+                })
+                .ToList();
+
+            return bookings.Any() ? bookings : new List<BookedSlotResponse>();
         }
 
     }

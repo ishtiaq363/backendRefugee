@@ -21,4 +21,10 @@ namespace RefugeeSkillsPlatform.Core.DTOs
       public string? RefundReference { get; set; }
       public string? RefundReason { get; set; }
     }
+
+    public class BookedSlotResponse
+    {
+        public TimeSpan BookingStart { get; set; }
+        public TimeSpan BookingEnd { get; set; }
+    }
 }

@@ -12,5 +12,7 @@ namespace RefugeeSkillsPlatform.Core.Interfaces.Services
         List<ServiceSlotResponse> GetServiceSlots(ServiceSlotRequest request);
         bool CreateBooking(BookingDTO request);
         int CreatePayment(PaymentDto request);
+        List<BookedSlotResponse> GetBookedSlots(int availabilitySlotId, DateTime date);
+
     }
 }
