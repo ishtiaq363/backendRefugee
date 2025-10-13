@@ -22,6 +22,8 @@ namespace RefugeeSkillsPlatform.Core.DTOs
         public long DeliveryMethodId { get; set; }
         public bool? IsApproved { get; set; }
         public DateTime? CreatedOn { get; set; }
+        public decimal? FeeCharges { get; set; }
+        public bool? IsScheduled { get; set; }
     }
 
     public class AllServicesRequest
@@ -53,6 +55,9 @@ namespace RefugeeSkillsPlatform.Core.DTOs
         public bool? IsApproved { get; set; }
         public long RowNum { get; set; }   // comes from ROW_NUMBER()
         public string? Logo { get; set; }
+
+        public decimal FeeCharges { get; set; }
+        public bool? IsScheduled { get; set; }
     }
     
     public class AvailabilitySlotsDTO
