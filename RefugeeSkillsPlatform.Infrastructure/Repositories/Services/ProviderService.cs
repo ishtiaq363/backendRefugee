@@ -30,7 +30,9 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
                 CreatedByUserId = request.CreatedByUserId,
                 DeliveryMethodId = request.DeliveryMethodId,
                 IsApproved = false,
-                CreatedOn = DateTime.UtcNow
+                CreatedOn = DateTime.UtcNow,
+                FeeCharges = request.FeeCharges ?? 0,
+                IsScheduled = false
             };
             if(service is null)
             {
@@ -54,6 +56,12 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
                 return 0;
             }
             _unitOfWork.GetRepository<AvailabilitySlots>().Add(slot);
+            var service = _unitOfWork.GetRepository<RefugeeSkillsPlatform.Core.Entities.Services>().FirstOrDefult(s => s.ServiceId == request.ServiceId);
+            if(service != null)
+            {
+                service.IsScheduled = true; // Mark service as unapproved when new slots are added
+                _unitOfWork.GetRepository<RefugeeSkillsPlatform.Core.Entities.Services>().Update(service);
+            }
             var result = _unitOfWork.Commit();
             return result;
 
