@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using RefugeeSkillsPlatform.Core.DTOs;
 using RefugeeSkillsPlatform.Core.Interfaces.Services;
+using RefugeeSkillsPlatform.Infrastructure.Repositories.Services;
 using RefugeeSkillsPlatform.WebApi.Common;
 
 namespace RefugeeSkillsPlatform.WebApi.Controllers
@@ -27,7 +28,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                     Data = null,
                     Success = false,
                     Status = 401,
-                    Message = "No Record found"
+                    Message = "No Slots Available"
 
                 });
             }
@@ -40,7 +41,29 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
 
             });
         }
-       
+        [HttpPost]
+        public IActionResult GetAllBookingsForClient([FromBody] BookingRequestForClient request)
+        {
+            var bookingList = _clientService.GetBookingListForClientId(request);
+            if (bookingList == null || bookingList.Count == 0)
+            {
+                return NotFound(new StandardRequestResponse<List<BookingListDto>>()
+                {
+                    Data = null,
+                    Status = 404,
+                    Success = false,
+                    Message = "No record to show"
+                });
+            }
+            return Ok(new StandardRequestResponse<List<BookingListDto>>()
+            {
+                Data = bookingList,
+                Status = 200,
+                Success = true,
+                Message = "Successfully retrieve the Users"
+            });
+
+        }
         [HttpPost]
         public IActionResult Booking([FromBody] BookingDTO request)
         {

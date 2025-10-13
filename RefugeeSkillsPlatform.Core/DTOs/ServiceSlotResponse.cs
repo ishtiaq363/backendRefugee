@@ -64,5 +64,11 @@ namespace RefugeeSkillsPlatform.Core.DTOs
         public long? ServiceId { get; set; }
     }
 
+    public class BookingRequestForClient
+    {
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+        public string? Email { get; set; }
+    }
 
 }

@@ -109,7 +109,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             var bookings = _unitOfWork.GetRepository<Bookings>()
                 .GetAll()
                 .Where(b => b.AvailabilitySlotId == availabilitySlotId
-                            && b.BookingDate.Date == date.Date)
+                            && b.SlotStartDate.Date == date.Date)
                 .Select(b => new BookedSlotResponse
                 {
                     BookingStart = b.BookingStart,
@@ -118,6 +118,23 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
                 .ToList();
 
             return bookings.Any() ? bookings : new List<BookedSlotResponse>();
+        }
+
+       
+        public List<BookingListDto> GetBookingListForClientId(BookingRequestForClient request)
+        {
+            var currentClient = _unitOfWork.GetRepository<Users>().FirstOrDefult(u => u.Email == request.Email);
+            if(currentClient is null)
+            {
+                throw new InvalidOperationException("Invalid email of the Client email.");
+            }
+            var pageNumParam = new SqlParameter("@PageNumber", SqlDbType.Int) { Value = request.PageNumber };
+            var pageSizeParam = new SqlParameter("@PageSize", SqlDbType.Int) { Value = request.PageSize };
+            var clientId = new SqlParameter("@ClientId", SqlDbType.BigInt) { Value = (object?)currentClient.UserId ?? DBNull.Value };
+            var services = _unitOfWork.SpListRepository<BookingListDto>(
+           "Sp_GetAllBookingsForClients @PageNumber, @PageSize, @ClientId", pageNumParam, pageSizeParam, clientId);
+
+            return services.Any() ? services : new List<BookingListDto>();
         }
 
     }

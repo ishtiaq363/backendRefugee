@@ -13,6 +13,7 @@ namespace RefugeeSkillsPlatform.Core.Interfaces.Services
         bool CreateBooking(BookingDTO request);
         int CreatePayment(PaymentDto request);
         List<BookedSlotResponse> GetBookedSlots(int availabilitySlotId, DateTime date);
+        List<BookingListDto> GetBookingListForClientId(BookingRequestForClient request);
 
     }
 }
