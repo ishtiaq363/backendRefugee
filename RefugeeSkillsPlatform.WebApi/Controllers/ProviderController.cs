@@ -84,5 +84,29 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                 Success = true
             });
         }
+
+        [HttpPost]
+        public IActionResult GetAllServicesForProvider([FromBody] AllServicesForProviderRequest request)
+        {
+            var servicesList = _providerService.GetAllServicesForProvider(request);
+            if (servicesList == null || !servicesList.Any())
+            {
+                return NotFound(new StandardRequestResponse<List<ServiceResponse>>()
+                {
+                    Data = null,
+                    Status = 404,
+                    Success = false,
+                    Message = "No record to show"
+                });
+            }
+            return Ok(new StandardRequestResponse<List<ServiceResponse>>()
+            {
+                Data = servicesList,
+                Status = 200,
+                Success = true,
+                Message = "Successfully retrieve the Users"
+            });
+
+        }
     }
 }

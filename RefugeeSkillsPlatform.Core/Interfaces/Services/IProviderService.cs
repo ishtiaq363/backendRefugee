@@ -15,6 +15,7 @@ namespace RefugeeSkillsPlatform.Core.Interfaces.Services
         int CreateSlots(AvailabilitySlotsDTO request);
 
         bool IsAccountApproved(int providerId);
+        List<ServiceResponse> GetAllServicesForProvider(AllServicesForProviderRequest request);
 
     }
 }

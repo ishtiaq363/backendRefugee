@@ -34,6 +34,14 @@ namespace RefugeeSkillsPlatform.Core.DTOs
         // Add this for filtering by user
         public int? UserId { get; set; }
     }
+    public class AllServicesForProviderRequest
+    {
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+
+        // Add this for filtering by user
+        public string? Email { get; set; }
+    }
     public class AllBookingsRequest
     {
         public int PageNumber { get; set; }
