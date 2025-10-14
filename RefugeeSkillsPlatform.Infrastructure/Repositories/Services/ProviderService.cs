@@ -67,6 +67,18 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 
         }
 
+        public List<ServiceResponse> GetAllServicesForProvider(AllServicesForProviderRequest request)
+        {
+            var provider = _unitOfWork.GetRepository<Users>().FirstOrDefult(u => u.Email == request.Email);
+            var pageNumParam = new SqlParameter("@PageNumber", SqlDbType.Int) { Value = request.PageNumber };
+            var pageSizeParam = new SqlParameter("@PageSize", SqlDbType.Int) { Value = request.PageSize };
+            var userId = new SqlParameter("@UserId", SqlDbType.Int) { Value = (object?)provider.UserId ?? DBNull.Value };
+            var services = _unitOfWork.SpListRepository<ServiceResponse>(
+           "sp_GetAllServices @PageNumber, @PageSize, @UserId", pageNumParam, pageSizeParam, userId);
+
+            return services.Any() ? services : new List<ServiceResponse>();
+        }
+
         public List<ServiceResponse> GetAllServices(AllServicesRequest request)
         {
             var pageNumParam = new SqlParameter("@PageNumber", SqlDbType.Int) { Value = request.PageNumber };
