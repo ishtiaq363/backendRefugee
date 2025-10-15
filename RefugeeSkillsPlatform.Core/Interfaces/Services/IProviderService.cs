@@ -17,5 +17,8 @@ namespace RefugeeSkillsPlatform.Core.Interfaces.Services
         bool IsAccountApproved(int providerId);
         List<ServiceResponse> GetAllServicesForProvider(AllServicesForProviderRequest request);
 
+        AdminStatResponse GetAdminStats();
+        ProviderStatResponse GetProviderStats(ProviderStatsRequest request);
+
     }
 }

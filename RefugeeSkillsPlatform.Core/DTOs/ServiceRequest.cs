@@ -26,6 +26,24 @@ namespace RefugeeSkillsPlatform.Core.DTOs
         public bool? IsScheduled { get; set; }
     }
 
+    public class AdminStatResponse
+    {
+        public int ActiveServices { get; set; } = 0;
+        public int TotalClients { get; set; } = 0;
+        public int TotalProviders { get; set; } = 0;
+        public int ServiceResquests { get; set; } = 0;
+        public int BookedServices { get; set; } = 0;
+       
+    }
+
+    public class ProviderStatResponse
+    {
+        public int ActiveServices { get; set; } = 0;
+        public int TotalClients { get; set; } = 0;
+        public int ServiceResquests { get; set; } = 0;
+        public int BookedServices { get; set; } = 0;
+    }
+
     public class AllServicesRequest
     {
         public int PageNumber { get; set; }
@@ -77,5 +95,9 @@ namespace RefugeeSkillsPlatform.Core.DTOs
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
      }       
+    public class ProviderStatsRequest
+    {
+        public string? Email { get; set; }
+    }
 
 }

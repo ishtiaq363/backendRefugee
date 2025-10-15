@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Azure.Core;
+using Microsoft.Data.SqlClient;
 using RefugeeSkillsPlatform.Core.DTOs;
 using RefugeeSkillsPlatform.Core.Entities;
 using RefugeeSkillsPlatform.Core.Interfaces;
@@ -77,6 +78,78 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
            "sp_GetAllServices @PageNumber, @PageSize, @UserId", pageNumParam, pageSizeParam, userId);
 
             return services.Any() ? services : new List<ServiceResponse>();
+        }
+
+        public ProviderStatResponse GetProviderStats(ProviderStatsRequest request)
+        {
+            // Get provider by email
+            var provider = _unitOfWork.GetRepository<Users>()
+                .FirstOrDefult(u => u.Email == request.Email);
+
+            if (provider == null)
+                return new ProviderStatResponse(); // return default object instead of null
+
+            var providerId = provider.UserId;
+
+            // Get repositories
+            var servicesRepo = _unitOfWork.GetRepository<RefugeeSkillsPlatform.Core.Entities.Services>();
+            var slotsRepo = _unitOfWork.GetRepository<AvailabilitySlots>();
+            var bookingsRepo = _unitOfWork.GetRepository<Bookings>();
+
+            // Materialize data first (avoid multiple open readers)
+            var services = servicesRepo.GetAll()
+                .Where(s => s.CreatedByUserId == providerId)
+                .ToList();
+
+            var slots = slotsRepo.GetAll().ToList();
+            var bookings = bookingsRepo.GetAll().ToList();
+
+            // Active & pending services
+            var activeServices = services.Count(s => s.IsApproved);
+            var serviceRequests = services.Count(s => !s.IsApproved);
+
+            // Booked services
+            var bookedServices = (
+                from booking in bookings
+                join slot in slots on booking.AvailabilitySlotId equals slot.AvailabilitySlotId
+                join service in services on slot.ServiceId equals service.ServiceId
+                select booking
+            ).Count();
+
+            // Unique clients
+            var totalClients = (
+                from booking in bookings
+                join slot in slots on booking.AvailabilitySlotId equals slot.AvailabilitySlotId
+                join service in services on slot.ServiceId equals service.ServiceId
+                select booking.ClientId
+            ).Distinct().Count();
+
+            // Compose response
+            return new ProviderStatResponse
+            {
+                ActiveServices = activeServices,
+                ServiceResquests = serviceRequests,
+                BookedServices = bookedServices,
+                TotalClients = totalClients
+            };
+        }
+
+
+        public AdminStatResponse GetAdminStats()
+        {            
+            var totalProvider =  _unitOfWork.GetRepository<Users>().GetAll().Where(x => x.RoleId == 4002).Count();
+            var totalClients = _unitOfWork.GetRepository<Users>().GetAll().Where(x => x.RoleId == 4001).Count();
+            var activeService = _unitOfWork.GetRepository<RefugeeSkillsPlatform.Core.Entities.Services>().GetAll().Where(x => x.IsApproved == true).Count();
+            var serviceRequest = _unitOfWork.GetRepository<RefugeeSkillsPlatform.Core.Entities.Services>().GetAll().Where(x => x.IsApproved == false).Count();
+            var bookedServices = _unitOfWork.GetRepository<Bookings>().GetAll().Count();
+            AdminStatResponse adminStats = new AdminStatResponse() { 
+            TotalProviders = totalProvider,
+            TotalClients = totalClients,
+            ActiveServices = activeService,
+            BookedServices = bookedServices,
+            ServiceResquests = serviceRequest
+            };
+            return adminStats;
         }
 
         public List<ServiceResponse> GetAllServices(AllServicesRequest request)
