@@ -87,6 +87,55 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
         }
 
         [HttpPost]
+        public IActionResult GetProviderDashboardStats(ProviderStatsRequest request)
+        {
+            var providerStats = _providerService.GetProviderStats(request);
+            if (providerStats == null)
+            {
+                return NotFound(new StandardRequestResponse<ProviderStatResponse>()
+                {
+                    Data = null,
+                    Status = 404,
+                    Success = false,
+                    Message = "No record to show"
+                });
+            }
+            return Ok(new StandardRequestResponse<ProviderStatResponse>()
+            {
+                Data = providerStats,
+                Status = 200,
+                Success = true,
+                Message = "Successfully retrieve the Users"
+            });
+
+        }
+
+
+        [HttpGet]
+        public IActionResult GetAdminDashboardStats()
+        {
+            var adminStats = _providerService.GetAdminStats();
+            if (adminStats == null)
+            {
+                return NotFound(new StandardRequestResponse<AdminStatResponse>()
+                {
+                    Data = null,
+                    Status = 404,
+                    Success = false,
+                    Message = "No record to show"
+                });
+            }
+            return Ok(new StandardRequestResponse<AdminStatResponse>()
+            {
+                Data = adminStats,
+                Status = 200,
+                Success = true,
+                Message = "Successfully retrieve the Users"
+            });
+
+        }
+
+        [HttpPost]
         public IActionResult ServiceApproval([FromBody] ServiceApprovalRequest request)
         {
             var result = _userService.ServiceApproval(request);
