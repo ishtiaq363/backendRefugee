@@ -136,6 +136,37 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 
             return services.Any() ? services : new List<BookingListDto>();
         }
+       
+        public ClientStatResponse GetClientStats(ClientStatsRequest request)
+        {
+            // Get provider by email
+            var client = _unitOfWork.GetRepository<Users>()
+                .FirstOrDefult(u => u.Email == request.Email);
+
+            if (client == null)
+                return new ClientStatResponse(); // return default object instead of null
+
+            var clientId = client.UserId;
+
+            // Get repositories
+            var servicesRepo = _unitOfWork.GetRepository<RefugeeSkillsPlatform.Core.Entities.Services>();
+            
+            var bookingsRepo = _unitOfWork.GetRepository<Bookings>();
+
+            // Materialize data first (avoid multiple open readers)
+            var services = servicesRepo.GetAll()
+                .ToList().Count();
+
+           
+            var bookings = bookingsRepo.GetAll().Where(x => x.ClientId == clientId).ToList().Count();
+
+            // Compose response
+            return new ClientStatResponse
+            {
+                ActiveServices = services,
+                BookedServices = bookings
+            };
+        }
 
     }
 }

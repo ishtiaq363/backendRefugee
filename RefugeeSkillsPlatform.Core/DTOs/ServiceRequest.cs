@@ -99,5 +99,13 @@ namespace RefugeeSkillsPlatform.Core.DTOs
     {
         public string? Email { get; set; }
     }
-
+    public class ClientStatsRequest
+    {
+        public string? Email { get; set; }
+    }
+    public class ClientStatResponse
+    {
+        public int ActiveServices { get; set; } = 0;
+        public int BookedServices { get; set; } = 0;
+    }
 }
