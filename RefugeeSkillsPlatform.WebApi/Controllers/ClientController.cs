@@ -41,6 +41,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
 
             });
         }
+       
         [HttpPost]
         public IActionResult GetAllBookingsForClient([FromBody] BookingRequestForClient request)
         {
@@ -110,5 +111,31 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                 Success= true
             });
         }
+
+        [HttpPost]
+        public IActionResult GetClientDashboardStats(ClientStatsRequest request)
+        {
+            var clientStats = _clientService.GetClientStats(request);
+            if (clientStats == null)
+            {
+                return NotFound(new StandardRequestResponse<ClientStatResponse>()
+                {
+                    Data = null,
+                    Status = 404,
+                    Success = false,
+                    Message = "No record to show"
+                });
+            }
+            return Ok(new StandardRequestResponse<ClientStatResponse>()
+            {
+                Data = clientStats,
+                Status = 200,
+                Success = true,
+                Message = "Successfully retrieve the Users"
+            });
+
+        }
+
+
     }
 }
