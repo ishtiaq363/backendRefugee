@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RefugeeSkillsPlatform.Core.DTOs;
 using RefugeeSkillsPlatform.Core.Entities;
 using RefugeeSkillsPlatform.Core.Interfaces.Services;
+using RefugeeSkillsPlatform.Infrastructure.Repositories.Services;
 using RefugeeSkillsPlatform.WebApi.Common;
 
 namespace RefugeeSkillsPlatform.WebApi.Controllers
@@ -108,5 +109,30 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
             });
 
         }
+
+        [HttpPost]
+        public IActionResult GetAllBookingsForProvider([FromBody] BookingRequestForProvider request)
+        {
+            var bookingList = _providerService.GetBookingListForProviderId(request);
+            if (bookingList == null || bookingList.Count == 0)
+            {
+                return NotFound(new StandardRequestResponse<List<BookingListDto>>()
+                {
+                    Data = null,
+                    Status = 404,
+                    Success = false,
+                    Message = "No record to show"
+                });
+            }
+            return Ok(new StandardRequestResponse<List<BookingListDto>>()
+            {
+                Data = bookingList,
+                Status = 200,
+                Success = true,
+                Message = "Successfully retrieve the Users"
+            });
+
+        }
+
     }
 }

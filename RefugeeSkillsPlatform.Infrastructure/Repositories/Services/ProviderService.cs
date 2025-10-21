@@ -183,5 +183,21 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             }
             return false;
         }
+
+        public List<BookingListDto> GetBookingListForProviderId(BookingRequestForProvider request)
+        {
+            var currentClient = _unitOfWork.GetRepository<Users>().FirstOrDefult(u => u.Email == request.Email);
+            if (currentClient is null)
+            {
+                throw new InvalidOperationException("Invalid email of the Provider email.");
+            }
+            var pageNumParam = new SqlParameter("@PageNumber", SqlDbType.Int) { Value = request.PageNumber };
+            var pageSizeParam = new SqlParameter("@PageSize", SqlDbType.Int) { Value = request.PageSize };
+            var providerId = new SqlParameter("@ProviderId", SqlDbType.BigInt) { Value = (object?)currentClient.UserId ?? DBNull.Value };
+            var services = _unitOfWork.SpListRepository<BookingListDto>(
+           "Sp_GetAllBookingsForProvider @PageNumber, @PageSize, @ProviderId", pageNumParam, pageSizeParam, providerId);
+
+            return services.Any() ? services : new List<BookingListDto>();
+        }
     }
 }
