@@ -1,6 +1,8 @@
 ﻿using RefugeeSkillsPlatform.Core.DTOs;
+using RefugeeSkillsPlatform.Core.Entities;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,5 +22,7 @@ namespace RefugeeSkillsPlatform.Core.Interfaces.Services
         AdminStatResponse GetAdminStats();
         ProviderStatResponse GetProviderStats(ProviderStatsRequest request);
 
+        List<BookingListDto> GetBookingListForProviderId(BookingRequestForProvider request);
+        
     }
 }
