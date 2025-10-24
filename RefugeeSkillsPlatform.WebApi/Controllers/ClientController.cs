@@ -68,11 +68,13 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
         [HttpPost]
         public IActionResult Booking([FromBody] BookingDTO request)
         {
-            if(!_clientService.CreateBooking(request))
+            long bookingId = _clientService.CreateBooking(request);
+           
+                if (bookingId == 0)
             {
-                return Ok(new StandardRequestResponse<bool>()
+                return Ok(new StandardRequestResponse<long>()
                 {
-                    Data = false,
+                    Data = 0,
                     Success = false,
                     Status = 401,
                     Message = "Booking Failed, already booked"
@@ -80,9 +82,9 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                 });
 
             }
-            return Ok(new StandardRequestResponse<bool>()
+            return Ok(new StandardRequestResponse<long>()
             {
-                Data = true,
+                Data = bookingId,
                 Success = true,
                 Status = 200,
                 Message = "Service Booked Successfully"

@@ -8,6 +8,8 @@ using RefugeeSkillsPlatform.WebApi.Middlewares;
 using RefugeeSkillsPlatform.WebApi.Common;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using RefugeeSkillsPlatform.Core.DTOs;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +22,8 @@ builder.Services.AddScoped<IDeliveryMethodsService, DeliveryMethodsService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProviderService, ProviderService>();
 builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

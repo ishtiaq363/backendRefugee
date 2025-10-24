@@ -6,6 +6,7 @@ using RefugeeSkillsPlatform.Core.Interfaces.Services;
 using RefugeeSkillsPlatform.Infrastructure.Repositories;
 using RefugeeSkillsPlatform.Infrastructure.Repositories.Services;
 using RefugeeSkillsPlatform.WebApi.Common;
+using Stripe;
 
 namespace RefugeeSkillsPlatform.WebApi.Controllers
 {
@@ -42,6 +43,55 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                 Status = 200,
                 Success = true
             });
+        }
+
+
+        [HttpPost]
+        public IActionResult CreatePaymentIntent([FromBody] PaymentRequest request)
+        {
+            var options = new PaymentIntentCreateOptions
+            {
+                Amount = (long)(request.Amount * 100),
+                Currency = "usd",
+                Metadata = new Dictionary<string, string>
+        {
+            { "BookingId", request.BookingId.ToString() }
+        }
+            };
+
+            var service = new PaymentIntentService();
+            var paymentIntent = service.Create(options);
+
+            return Ok(new { clientSecret = paymentIntent.ClientSecret });
+        }
+        //[HttpPost]
+        //public IActionResult CreatePaymentIntent([FromBody] PaymentRequest request)
+        //{
+        //    var options = new PaymentIntentCreateOptions
+        //    {
+        //        Amount = (long)(request.Amount * 100),
+        //        Currency = "usd",
+        //        Metadata = new Dictionary<string, string>
+        //        {
+        //            { "BookingId", request.BookingId.ToString() }
+        //        }
+        //    };
+
+        //    var service = new PaymentIntentService();
+        //    var paymentIntent = service.Create(options);
+
+        //    return Ok(new { clientSecret = paymentIntent.ClientSecret });
+        //}
+
+        [HttpPost]
+        public IActionResult UpdatePaymentStatus([FromBody] PaymentStatusUpdateRequest request)
+        {
+            var result = _clientService.UpdatePaymentStatus(request.BookingId, request.Status);
+
+            if (result == 0)
+                return NotFound("Booking not found");
+
+            return Ok(new { message = "Payment status updated successfully" });
         }
 
 
