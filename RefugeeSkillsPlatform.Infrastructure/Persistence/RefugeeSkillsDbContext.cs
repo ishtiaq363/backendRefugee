@@ -32,6 +32,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Persistence
             modelBuilder.Entity<ServiceResponse>().HasNoKey();
             modelBuilder.Entity<ServiceSlotResponse>().HasNoKey();
             modelBuilder.Entity<BookingListDto>().HasNoKey();
+            modelBuilder.Entity<PaymentResponse>().HasNoKey();
         }
     }
 }

@@ -84,6 +84,7 @@ namespace RefugeeSkillsPlatform.Core.DTOs
 
         public decimal FeeCharges { get; set; }
         public bool? IsScheduled { get; set; }
+
     }
     
     public class AvailabilitySlotsDTO

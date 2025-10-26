@@ -55,11 +55,40 @@ namespace RefugeeSkillsPlatform.Core.DTOs
         public DateTime CreatedOn { get; set; }
     }
 
+    public class PaymentResponse
+    {
+        public long PaymentId { get; set; }              // not null
+        public long BookingId { get; set; }              // not null
+        public long ClientId { get; set; }               // not null
+        public string? ClientName { get; set; }
+        public string? ClientEmail { get; set; }
+        public long ProviderId { get; set; }             // not null
+        public string? ProviderName { get; set; }
+        public string? ProviderEmail { get; set; }
+        public string? ServiceName { get; set; }
+        public decimal? Amount { get; set; }             // make nullable ✅
+        public DateTime? PaymentDate { get; set; }       // make nullable ✅
+        public string? PaymentStatus { get; set; }
+        public string? TransactionReference { get; set; }
+        public string? PaymentMethod { get; set; }       // nullable ✅
+        public bool? IsRefunded { get; set; }            // nullable ✅
+        public decimal? RefundAmount { get; set; }       // nullable ✅
+        public DateTime? RefundDate { get; set; }        // nullable ✅
+        public string? RefundReference { get; set; }     // nullable ✅
+        public string? RefundReason { get; set; }        // nullable ✅
+    }
 
     public class UserProfileRequest
     {
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
+    }
+
+    public class PaymentProviderRequest
+    {
+        public int PageNumber { get; set; } = 1;   
+        public int PageSize { get; set; } = 30;    
+        public long? ProviderId { get; set; }     
     }
 
     public class ApprovalRequest

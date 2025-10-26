@@ -39,6 +39,33 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
             });
 
         }
+
+        [HttpPost]
+        public IActionResult GetAllPaymentsForProvider([FromBody] PaymentProviderRequest paymentRequest)
+        {
+            var paymentList = _userService.GetAllPaymentsForProvider(paymentRequest);
+
+            if (paymentList == null || !paymentList.Any())
+            {
+                return Ok(new StandardRequestResponse<List<PaymentResponse>>()
+                {
+                    Data = null,
+                    Status = 404,
+                    Success = false,
+                    Message = "No records found"
+                });
+            }
+
+            return Ok(new StandardRequestResponse<List<PaymentResponse>>()
+            {
+                Data = paymentList,
+                Status = 200,
+                Success = true,
+                Message = "Successfully retrieved payments"
+            });
+        }
+
+
         [HttpPost]
         public IActionResult ProviderApproval([FromBody] ApprovalRequest request)
         {
