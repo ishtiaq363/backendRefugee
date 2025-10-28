@@ -23,6 +23,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Persistence
         public DbSet<AvailabilitySlots> AvailabilitySlots { get; set; }
         public DbSet<Bookings> Bookings { get; set; }
         public DbSet<Payments> Payments { get; set; }
+        public DbSet<UserZoomAccount> UserZoomAccount { get; set; }  // 👈 keyless entity
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

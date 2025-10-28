@@ -8,11 +8,15 @@ using RefugeeSkillsPlatform.WebApi.Middlewares;
 using RefugeeSkillsPlatform.WebApi.Common;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using RefugeeSkillsPlatform.Core.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var dbConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.Configure<ZoomSettings>(
+    builder.Configuration.GetSection("ZoomSettings"));
+
 builder.Services.AddControllers();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
@@ -20,6 +24,8 @@ builder.Services.AddScoped<IDeliveryMethodsService, DeliveryMethodsService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProviderService, ProviderService>();
 builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<IZoomService, ZoomService>();
+
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
