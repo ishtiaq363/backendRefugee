@@ -21,7 +21,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             _unitOfWork = unitOfWork;
         }
 
-        public bool CreateBooking(BookingDTO request)
+        public long CreateBooking(BookingDTO request)
         {
             
                 var isAlreadyBooked = _unitOfWork.GetRepository<Bookings>().GetAll().Any(x =>
@@ -39,7 +39,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 
 
             if (isAlreadyBooked)
-                return false; // booking conflict
+                return 0; // booking conflict
 
             var client = _unitOfWork.GetRepository<Users>().FirstOrDefult(u => u.Email == request.Email);
             if (client is null)
@@ -63,7 +63,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             _unitOfWork.GetRepository<Bookings>().Add(newBooking);
             _unitOfWork.Commit();
 
-            return true;
+            return newBooking.BookingId;
         }
 
 
@@ -168,5 +168,19 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             };
         }
 
+        public int UpdatePaymentStatus(long bookingId, string status)
+        {
+            var booking = _unitOfWork.GetRepository<Bookings>()
+                .FirstOrDefult(b => b.BookingId == bookingId);
+
+            if (booking == null)
+                return 0;
+
+            booking.Status = status;
+            booking.BookingDate = DateTime.UtcNow;
+
+            _unitOfWork.Commit();
+            return 1;
+        }
     }
 }

@@ -27,4 +27,24 @@ namespace RefugeeSkillsPlatform.Core.DTOs
         public TimeSpan BookingStart { get; set; }
         public TimeSpan BookingEnd { get; set; }
     }
+
+    public class PaymentRequest
+    {
+        public int BookingId { get; set; }
+        public decimal Amount { get; set; }
+    }
+
+    public class PaymentStatusUpdateRequest
+    {
+        public long BookingId { get; set; }
+        public string Status { get; set; } = string.Empty;
+    }
+
+    public class StripeSettings
+    {
+        public string SecretKey { get; set; }
+        public string PublishableKey { get; set; }
+    }
+
+
 }

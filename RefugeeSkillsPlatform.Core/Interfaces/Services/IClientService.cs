@@ -10,11 +10,12 @@ namespace RefugeeSkillsPlatform.Core.Interfaces.Services
     public interface IClientService
     {
         List<ServiceSlotResponse> GetServiceSlots(ServiceSlotRequest request);
-        bool CreateBooking(BookingDTO request);
+        //bool CreateBooking(BookingDTO request);
         int CreatePayment(PaymentDto request);
         List<BookedSlotResponse> GetBookedSlots(int availabilitySlotId, DateTime date);
         List<BookingListDto> GetBookingListForClientId(BookingRequestForClient request);
         ClientStatResponse GetClientStats(ClientStatsRequest request);
-
+        long CreateBooking(BookingDTO request);
+        int UpdatePaymentStatus(long bookingId, string status);
     }
 }

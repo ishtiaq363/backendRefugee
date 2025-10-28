@@ -56,28 +56,33 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             return true;
         }
 
-        public List<UserProfileResponse>? GetUserProfiles(UserProfileRequest request)
-        {
-            var pageNumParam = new SqlParameter("@PageNumber", SqlDbType.Int) { Value = request.PageNumber };
-            var pageSizeParam = new SqlParameter("@PageSize", SqlDbType.Int) { Value = request.PageSize };
-            var response = _unitOfWork.SpListRepository<UserProfileResponse>(
-           "sp_GetUserProfiles @PageNumber, @PageSize", pageNumParam, pageSizeParam);
+            public List<UserProfileResponse>? GetUserProfiles(UserProfileRequest request)
+            {
+                var pageNumParam = new SqlParameter("@PageNumber", SqlDbType.Int) { Value = request.PageNumber };
+                var pageSizeParam = new SqlParameter("@PageSize", SqlDbType.Int) { Value = request.PageSize };
+                var response = _unitOfWork.SpListRepository<UserProfileResponse>(
+               "sp_GetUserProfiles @PageNumber, @PageSize", pageNumParam, pageSizeParam);
             
-            return response.Any() ? response : new List<UserProfileResponse>();
-            //var listOfUserProfiles = _unitOfWork.GetRepository<Users>().GetAll().Select(x => new ).ToList();
-            //var listOfUserProfiles = (from u in _unitOfWork.GetRepository<Users>().GetAll()
-            //                          join r in _unitOfWork.GetRepository<Roles>().GetAll()
-            //                          on u.RoleId equals r.RoleId
-            //select new UserProfileResponse()
-            //{
-            //    UserName = u.UserName,
-            //    Email = u.Email,
-            //    FirstName = u.FirstName,
-            //    LastName = u.LastName,
-            //    RoleName = r.RoleName
-            //}).ToList();
-            //return listOfUserProfiles;
+                return response.Any() ? response : new List<UserProfileResponse>();
+           
+            }
+
+        public List<PaymentResponse>? GetAllPaymentsForProvider(PaymentProviderRequest request)
+        {
+            var pageNumber = request.PageNumber <= 0 ? 1 : request.PageNumber;
+            var pageNumParam = new SqlParameter("@PageNumber", SqlDbType.Int) { Value = pageNumber };
+            var pageSizeParam = new SqlParameter("@PageSize", SqlDbType.Int) { Value = request.PageSize };
+            var providerIdParam = new SqlParameter("@ProviderId", SqlDbType.BigInt);
+            providerIdParam.Value = request.ProviderId ?? (object)DBNull.Value;
+
+            var response = _unitOfWork.SpListRepository<PaymentResponse>(
+                "Sp_GetAllPaymentForProvider @PageNumber, @PageSize, @ProviderId",
+                pageNumParam, pageSizeParam, providerIdParam
+            );
+
+            return response.Any() ? response : new List<PaymentResponse>();
         }
+
 
         public int RegisterUser(UserRequest request)
         {
