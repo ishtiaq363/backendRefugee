@@ -48,9 +48,17 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             var request = new HttpRequestMessage(HttpMethod.Post, $"{tokenUrl}?grant_type=authorization_code&code={code}&redirect_uri={_redirectUri}");
             request.Headers.Authorization = new AuthenticationHeaderValue("Basic", authHeader);
 
-            var response = await _httpClient.SendAsync(request);
-            if (!response.IsSuccessStatusCode)
-                throw new Exception("Failed to retrieve access token from Zoom.");
+                var response = await _httpClient.SendAsync(request);
+                var json = await response.Content.ReadAsStringAsync();
+
+
+
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Failed to retrieve access token from Zoom. " +
+                                        $"Status: {response.StatusCode}, Body: {json}");
+                }
 
             var json = await response.Content.ReadAsStringAsync();
             var tokenData = JsonSerializer.Deserialize<ZoomTokenResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -58,28 +66,44 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             if (tokenData == null)
                 throw new Exception("Invalid token response.");
 
-            // Save tokens to DB
-            var userId = Convert.ToInt64(state); // Assuming 'state' contains userId from frontend
-            var zoomRepo = _unitOfWork.GetRepository<UserZoomAccount>();
-            var existing = zoomRepo.FirstOrDefult(x => x.UserId == userId);
+                // Fetch user info from Zoom
+                var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.zoom.us/v2/users/me");
+                userInfoRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenData.AccessToken);
+                var userInfoResponse = await _httpClient.SendAsync(userInfoRequest);
+                var userInfoJson = await userInfoResponse.Content.ReadAsStringAsync();
 
-            if (existing == null)
-            {
-                zoomRepo.Add(new UserZoomAccount
+                var userInfo = JsonSerializer.Deserialize<ZoomUserInfo>(userInfoJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+
+                // Parse userId from state
+                if (!long.TryParse(state, out var userId))
+                    throw new Exception($"Invalid state value '{state}' — expected userId.");
+
+                // Save or update Zoom account
+                var zoomRepo = _unitOfWork.GetRepository<UserZoomAccount>();
+                var existing = zoomRepo.FirstOrDefult(x => x.UserId == userId);
+
+                if (existing == null)
                 {
-                    UserId = userId,
-                    AccessToken = tokenData.AccessToken,
-                    RefreshToken = tokenData.RefreshToken,
-                    TokenExpiresAt = DateTime.UtcNow.AddSeconds(tokenData.ExpiresIn)
-                });
-            }
-            else
-            {
-                existing.AccessToken = tokenData.AccessToken;
-                existing.RefreshToken = tokenData.RefreshToken;
-                existing.TokenExpiresAt = DateTime.UtcNow.AddSeconds(tokenData.ExpiresIn);
-                zoomRepo.Update(existing);
-            }
+                    zoomRepo.Add(new UserZoomAccount
+                    {
+                        UserId = userId,
+                        AccessToken = tokenData.AccessToken,
+                        RefreshToken = tokenData.RefreshToken,
+                        TokenExpiresAt = DateTime.UtcNow.AddSeconds(tokenData.ExpiresIn),
+                        ZoomEmail = userInfo?.Email,
+                        //ZoomAccountId = userInfo?.Id
+                    });
+                }
+                else
+                {
+                    existing.AccessToken = tokenData.AccessToken;
+                    existing.RefreshToken = tokenData.RefreshToken;
+                    existing.TokenExpiresAt = DateTime.UtcNow.AddSeconds(tokenData.ExpiresIn);
+                    existing.ZoomEmail = userInfo?.Email;
+                    //existing.ZoomAccountId = userInfo?.Id;
+                    zoomRepo.Update(existing);
+                }
 
             _unitOfWork.Commit();
             return tokenData;

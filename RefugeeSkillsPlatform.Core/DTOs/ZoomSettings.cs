@@ -12,4 +12,14 @@ namespace RefugeeSkillsPlatform.Core.DTOs
         public string ClientSecret { get; set; }
         public string RedirectUri { get; set; }
     }
+
+    public class ZoomUserInfo
+    {
+        public string Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string AccountId { get; set; }
+    }
+
 }
