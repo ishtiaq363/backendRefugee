@@ -33,6 +33,20 @@ namespace RefugeeSkillsPlatform.Core.DTOs
         public int BookingId { get; set; }
         public decimal Amount { get; set; }
     }
+    public class RefundResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public string RefundId { get; set; }
+        public string RefundStatus { get; set; }
+    }
+    public class RefundBookingRequest
+    {
+        public long BookingId { get; set; }
+        public string RefundReason { get; set; } = "No Specific reason";
+    }
+
+
 
     public class PaymentStatusUpdateRequest
     {
