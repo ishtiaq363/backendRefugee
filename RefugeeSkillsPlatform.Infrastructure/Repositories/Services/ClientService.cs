@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using RefugeeSkillsPlatform.Core.DTOs;
 using RefugeeSkillsPlatform.Core.Entities;
 using RefugeeSkillsPlatform.Core.Interfaces;
@@ -181,6 +182,17 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 
             _unitOfWork.Commit();
             return 1;
+        }
+
+        public List<ServiceResponse> GetAllServicesForClient(AllServicesRequest request)
+        {
+            var pageNumParam = new SqlParameter("@PageNumber", SqlDbType.Int) { Value = request.PageNumber };
+            var pageSizeParam = new SqlParameter("@PageSize", SqlDbType.Int) { Value = request.PageSize };
+            var userId = new SqlParameter("@UserId", SqlDbType.Int) { Value = (object?)request.UserId ?? DBNull.Value };
+            var services = _unitOfWork.SpListRepository<ServiceResponse>(
+           "sp_GetAllServicesForClient @PageNumber, @PageSize, @UserId", pageNumParam, pageSizeParam, userId);
+
+            return services.Any() ? services : new List<ServiceResponse>();
         }
     }
 }

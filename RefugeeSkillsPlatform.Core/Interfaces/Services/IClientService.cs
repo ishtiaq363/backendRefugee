@@ -17,5 +17,6 @@ namespace RefugeeSkillsPlatform.Core.Interfaces.Services
         ClientStatResponse GetClientStats(ClientStatsRequest request);
         long CreateBooking(BookingDTO request);
         int UpdatePaymentStatus(long bookingId, string status);
+        List<ServiceResponse> GetAllServicesForClient(AllServicesRequest request);
     }
 }
