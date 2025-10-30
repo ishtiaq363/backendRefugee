@@ -73,6 +73,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
         [HttpPost]
         public IActionResult UpdatePaymentStatus([FromBody] PaymentStatusUpdateRequest request)
         {
+            //request.Status = "Pending";
             var result = _clientService.UpdatePaymentStatus(request.BookingId, request.Status);
 
             if (result == 0)
@@ -88,7 +89,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
             {
                 // Step 1: Find the payment record by BookingId
                 var payment = _unitOfWork.GetRepository<Payments>().FirstOrDefult(p => p.BookingId == request.BookingId);
-
+                var booking = _unitOfWork.GetRepository<Bookings>().FirstOrDefult(b => b.BookingId == request.BookingId);
                 if (payment == null)
                     return NotFound("Payment not found for this booking.");
 
@@ -110,7 +111,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                 {
                     Charge = chargeId,
                     Amount = (long)(payment.Amount * 100), // refund full amount
-                    Reason = request.RefundReason ?? "requested_by_customer"
+                    Reason =  "requested_by_customer"
                 };
 
                 var refund = refundService.Create(refundOptions);
@@ -123,6 +124,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                 payment.RefundReason = request.RefundReason ?? "requested_by_customer";
                 payment.PaymentStatus = "Refunded";
 
+                booking.Status = "Refunded";
                 _unitOfWork.Commit();
 
                 return Ok(new
