@@ -69,11 +69,14 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 
         public List<PaymentResponse>? GetAllPaymentsForProvider(PaymentProviderRequest request)
         {
+            var repo = _unitOfWork.GetRepository<Users>();
+            var user = repo.FirstOrDefult(x => x.Email == request.ProviderEmail);
+           
             var pageNumber = request.PageNumber <= 0 ? 1 : request.PageNumber;
             var pageNumParam = new SqlParameter("@PageNumber", SqlDbType.Int) { Value = pageNumber };
             var pageSizeParam = new SqlParameter("@PageSize", SqlDbType.Int) { Value = request.PageSize };
             var providerIdParam = new SqlParameter("@ProviderId", SqlDbType.BigInt);
-            providerIdParam.Value = request.ProviderId ?? (object)DBNull.Value;
+            providerIdParam.Value = user?.UserId ?? (object)DBNull.Value;
 
             var response = _unitOfWork.SpListRepository<PaymentResponse>(
                 "Sp_GetAllPaymentForProvider @PageNumber, @PageSize, @ProviderId",

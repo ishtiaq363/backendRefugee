@@ -88,7 +88,7 @@ namespace RefugeeSkillsPlatform.Core.DTOs
     {
         public int PageNumber { get; set; } = 1;   
         public int PageSize { get; set; } = 30;    
-        public long? ProviderId { get; set; }     
+        public string? ProviderEmail { get; set; }     
     }
 
     public class ApprovalRequest
