@@ -74,12 +74,12 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
                     throw new Exception("Invalid token response from Zoom.");
 
                 // Fetch user info from Zoom
-                //var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.zoom.us/v2/users/me");
-                //userInfoRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenData.AccessToken);
-                //var userInfoResponse = await _httpClient.SendAsync(userInfoRequest);
-                //var userInfoJson = await userInfoResponse.Content.ReadAsStringAsync();
+                var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.zoom.us/v2/users/me");
+                userInfoRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenData.AccessToken);
+                var userInfoResponse = await _httpClient.SendAsync(userInfoRequest);
+                var userInfoJson = await userInfoResponse.Content.ReadAsStringAsync();
 
-                //var userInfo = JsonSerializer.Deserialize<ZoomUserInfo>(userInfoJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var userInfo = JsonSerializer.Deserialize<ZoomUserInfo>(userInfoJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
 
                 // Parse userId from state
@@ -98,7 +98,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
                         AccessToken = tokenData.AccessToken,
                         RefreshToken = tokenData.RefreshToken,
                         TokenExpiresAt = DateTime.UtcNow.AddSeconds(tokenData.ExpiresIn),
-                        ZoomEmail = ""
+                        ZoomEmail = userInfo.Email ?? "",
                         //ZoomAccountId = userInfo?.Id
                     });
                 }
@@ -107,7 +107,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
                     existing.AccessToken = tokenData.AccessToken;
                     existing.RefreshToken = tokenData.RefreshToken;
                     existing.TokenExpiresAt = DateTime.UtcNow.AddSeconds(tokenData.ExpiresIn);
-                    existing.ZoomEmail = "";
+                    existing.ZoomEmail = userInfo.Email ?? "";
                     //existing.ZoomAccountId = userInfo?.Id;
                     zoomRepo.Update(existing);
                 }
