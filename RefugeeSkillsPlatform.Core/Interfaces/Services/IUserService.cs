@@ -16,5 +16,7 @@ namespace RefugeeSkillsPlatform.Core.Interfaces.Services
         bool ProviderApproval(ApprovalRequest request);
         bool ServiceApproval(ServiceApprovalRequest request);
         List<PaymentResponse>? GetAllPaymentsForProvider(PaymentProviderRequest request);
+
+        UserProfileResponse? GetUserProfileById(long userId);
     }
 }

@@ -193,5 +193,37 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             _unitOfWork.Commit();
             return true;
         }
+
+        public async Task<ZoomMeetingResponse> CreateMeetingAsync(long userId, ZoomMeetingRequest request)
+        {
+            var repo = _unitOfWork.GetRepository<UserZoomAccount>();
+            var account = repo.FirstOrDefult(x => x.UserId == userId);
+            if (account == null)
+                throw new Exception("Zoom account not connected.");
+
+            var meetingUrl = "https://api.zoom.us/v2/users/me/meetings";
+
+            var meetingData = new
+            {
+                topic = request.Topic,
+                type = 2, // Scheduled meeting
+                start_time = request.StartTime.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                duration = request.Duration,
+                password = request.Password
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(meetingData), Encoding.UTF8, "application/json");
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", account.AccessToken);
+
+            var response = await _httpClient.PostAsync(meetingUrl, content);
+            var json = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"Failed to create Zoom meeting. {json}");
+
+            var result = JsonSerializer.Deserialize<ZoomMeetingResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return result!;
+        }
+
     }
 }
