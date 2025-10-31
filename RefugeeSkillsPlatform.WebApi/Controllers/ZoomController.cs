@@ -29,8 +29,9 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                 return Ok(new
                 {
                     success = true,
-                    redirectUrl
+                    data = new { redirectUrl }
                 });
+
             }
             catch (Exception ex)
             {
@@ -54,7 +55,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                 {
                     success = true,
                     message = "Zoom account connected successfully.",
-                    data = result
+                    data = "Success"
                 });
             }
             catch (Exception ex)
@@ -66,7 +67,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
         /// <summary>
         /// Step 3: Get Zoom account info of a specific user
         /// </summary>
-        [Authorize]
+
         [HttpGet("account/{userId}")]
         public async Task<IActionResult> GetZoomAccount(long userId)
         {
@@ -87,7 +88,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
         /// <summary>
         /// Step 4: Refresh the access token (optional)
         /// </summary>
-        [Authorize]
+
         [HttpPost("refresh/{userId}")]
         public async Task<IActionResult> RefreshAccessToken(long userId)
         {
@@ -105,7 +106,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
         /// <summary>
         /// Step 5: Disconnect Zoom account
         /// </summary>
-        [Authorize]
+
         [HttpDelete("disconnect/{userId}")]
         public async Task<IActionResult> DisconnectZoom(long userId)
         {

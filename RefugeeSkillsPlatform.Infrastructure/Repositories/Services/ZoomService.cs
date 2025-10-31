@@ -42,11 +42,16 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 
         public async Task<ZoomTokenResponse?> ExchangeCodeForTokensAsync(string code, string state)
         {
-            var tokenUrl = "https://zoom.us/oauth/token";
-            var authHeader = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_clientId}:{_clientSecret}"));
+            try
+            {
+                var tokenUrl = "https://zoom.us/oauth/token";
+                var authHeader = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_clientId}:{_clientSecret}"));
 
-            var request = new HttpRequestMessage(HttpMethod.Post, $"{tokenUrl}?grant_type=authorization_code&code={code}&redirect_uri={_redirectUri}");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", authHeader);
+                var request = new HttpRequestMessage(
+                    HttpMethod.Post,
+                    $"{tokenUrl}?grant_type=authorization_code&code={code}&redirect_uri={_redirectUri}"
+                );
+                request.Headers.Authorization = new AuthenticationHeaderValue("Basic", authHeader);
 
                 var response = await _httpClient.SendAsync(request);
                 var json = await response.Content.ReadAsStringAsync();
@@ -60,19 +65,21 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
                                         $"Status: {response.StatusCode}, Body: {json}");
                 }
 
-            var json = await response.Content.ReadAsStringAsync();
-            var tokenData = JsonSerializer.Deserialize<ZoomTokenResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var tokenData = JsonSerializer.Deserialize<ZoomTokenResponse>(
+                    json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
 
-            if (tokenData == null)
-                throw new Exception("Invalid token response.");
+                if (tokenData == null)
+                    throw new Exception("Invalid token response from Zoom.");
 
                 // Fetch user info from Zoom
-                var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.zoom.us/v2/users/me");
-                userInfoRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenData.AccessToken);
-                var userInfoResponse = await _httpClient.SendAsync(userInfoRequest);
-                var userInfoJson = await userInfoResponse.Content.ReadAsStringAsync();
+                //var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.zoom.us/v2/users/me");
+                //userInfoRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenData.AccessToken);
+                //var userInfoResponse = await _httpClient.SendAsync(userInfoRequest);
+                //var userInfoJson = await userInfoResponse.Content.ReadAsStringAsync();
 
-                var userInfo = JsonSerializer.Deserialize<ZoomUserInfo>(userInfoJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                //var userInfo = JsonSerializer.Deserialize<ZoomUserInfo>(userInfoJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
 
                 // Parse userId from state
@@ -91,7 +98,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
                         AccessToken = tokenData.AccessToken,
                         RefreshToken = tokenData.RefreshToken,
                         TokenExpiresAt = DateTime.UtcNow.AddSeconds(tokenData.ExpiresIn),
-                        ZoomEmail = userInfo?.Email,
+                        ZoomEmail = ""
                         //ZoomAccountId = userInfo?.Id
                     });
                 }
@@ -100,14 +107,29 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
                     existing.AccessToken = tokenData.AccessToken;
                     existing.RefreshToken = tokenData.RefreshToken;
                     existing.TokenExpiresAt = DateTime.UtcNow.AddSeconds(tokenData.ExpiresIn);
-                    existing.ZoomEmail = userInfo?.Email;
+                    existing.ZoomEmail = "";
                     //existing.ZoomAccountId = userInfo?.Id;
                     zoomRepo.Update(existing);
                 }
 
-            _unitOfWork.Commit();
-            return tokenData;
+                try
+                {
+                    _unitOfWork.Commit();
+                }
+                catch (Exception dbEx)
+                {
+                    throw new Exception($"Database commit failed: {dbEx.Message}", dbEx);
+                }
+
+                return tokenData;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Zoom] ExchangeCodeForTokensAsync Error: {ex}");
+                throw new Exception($"Zoom token exchange failed: {ex.Message}", ex);
+            }
         }
+
 
         public async Task<ZoomAccountResponse?> GetUserZoomAccountAsync(long userId)
         {
