@@ -170,6 +170,29 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
         //    }
         //}
 
+        public UserProfileResponse GetUserProfileById(long userId)
+        {
+            var user = _unitOfWork.GetRepository<Users>().FirstOrDefult(x => x.UserId == userId);
+            if (user == null)
+                return new UserProfileResponse();
+            var role = _unitOfWork.GetRepository<Roles>().FirstOrDefult(r => r.RoleId == user.RoleId);
+            return new UserProfileResponse()
+            {
+                UserId = user.UserId,
+                UserName = user.UserName,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                ProfileImage = user.ProfileImage,
+                IsApproved = user.IsApproved,
+                RoleId = role?.RoleId ?? 0,
+                RoleName = role?.RoleName ?? string.Empty,
+            };
+        }
+
+
+
+
 
 
 

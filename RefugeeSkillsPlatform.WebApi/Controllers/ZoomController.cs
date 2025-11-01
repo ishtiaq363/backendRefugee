@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using RefugeeSkillsPlatform.Core.DTOs;
 using RefugeeSkillsPlatform.Core.Interfaces.Services;
 using RefugeeSkillsPlatform.Infrastructure.Repositories.Services;
 
@@ -11,10 +12,12 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
     public class ZoomController : ControllerBase
     {
         private readonly IZoomService _zoomService;
+        private readonly IUserService _userService;
 
-        public ZoomController(IZoomService zoomService)
+        public ZoomController(IZoomService zoomService, IUserService userService)
         {
             _zoomService = zoomService;
+            _userService = userService;
         }
 
         /// <summary>
@@ -29,8 +32,9 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                 return Ok(new
                 {
                     success = true,
-                    redirectUrl
+                    data = new { redirectUrl }
                 });
+
             }
             catch (Exception ex)
             {
@@ -54,7 +58,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                 {
                     success = true,
                     message = "Zoom account connected successfully.",
-                    data = result
+                    data = "Success"
                 });
             }
             catch (Exception ex)
@@ -66,7 +70,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
         /// <summary>
         /// Step 3: Get Zoom account info of a specific user
         /// </summary>
-        [Authorize]
+
         [HttpGet("account/{userId}")]
         public async Task<IActionResult> GetZoomAccount(long userId)
         {
@@ -87,7 +91,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
         /// <summary>
         /// Step 4: Refresh the access token (optional)
         /// </summary>
-        [Authorize]
+
         [HttpPost("refresh/{userId}")]
         public async Task<IActionResult> RefreshAccessToken(long userId)
         {
@@ -105,7 +109,7 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
         /// <summary>
         /// Step 5: Disconnect Zoom account
         /// </summary>
-        [Authorize]
+
         [HttpDelete("disconnect/{userId}")]
         public async Task<IActionResult> DisconnectZoom(long userId)
         {
@@ -119,6 +123,36 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
+
+        [HttpPost("create-meeting/{userId}")]
+        public async Task<IActionResult> CreateMeeting(long userId, [FromBody] ZoomMeetingRequest request)
+        {
+            try
+            {
+                var profile = _userService.GetUserProfileById(userId);
+                if (profile == null)
+                    return BadRequest(new { success = false, message = "User not found." });
+                else if (profile.RoleName != "Provider")
+                    return BadRequest(new { success = false, message = "Only providers can create Zoom meetings." });
+                else if (!profile.IsApproved)
+                    return BadRequest(new { success = false, message = "Provider account not approved." });
+
+                var exist = await _zoomService.GetUserZoomAccountAsync(userId);
+                if (exist == null)
+                    return BadRequest(new { success = false, message = "Zoom account not connected." });
+                else if (exist.TokenExpiresAt <= DateTime.UtcNow){
+                    await _zoomService.RefreshAccessTokenAsync(userId);
+                }   
+
+                var meeting = await _zoomService.CreateMeetingAsync(userId, request);
+                return Ok(new { success = true, data = meeting });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
     }
 }
 

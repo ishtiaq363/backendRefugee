@@ -15,5 +15,7 @@ namespace RefugeeSkillsPlatform.Core.Interfaces.Services
         Task<ZoomTokenResponse?> RefreshAccessTokenAsync(long userId);
 
         Task<bool> DisconnectZoomAccountAsync(long userId);
+
+        Task<ZoomMeetingResponse> CreateMeetingAsync(long userId, ZoomMeetingRequest request);
     }
 }
