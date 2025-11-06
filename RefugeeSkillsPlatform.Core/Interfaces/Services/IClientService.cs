@@ -11,7 +11,7 @@ namespace RefugeeSkillsPlatform.Core.Interfaces.Services
     {
         List<ServiceSlotResponse> GetServiceSlots(ServiceSlotRequest request);
         //bool CreateBooking(BookingDTO request);
-        int CreatePayment(PaymentDto request);
+        Task<int> CreatePaymentAsync(PaymentDto request);
         List<BookedSlotResponse> GetBookedSlots(int availabilitySlotId, DateTime date);
         List<BookingListDto> GetBookingListForClientId(BookingRequestForClient request);
         ClientStatResponse GetClientStats(ClientStatsRequest request);
