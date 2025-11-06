@@ -37,5 +37,7 @@ namespace RefugeeSkillsPlatform.Core.Entities
         [Required]
         public DateTime BookingDate { get; set; } = DateTime.Now;
 
+        public string? ZoomStatus { get; set; } = string.Empty;
+
     }
 }

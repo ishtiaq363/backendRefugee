@@ -16,10 +16,12 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
     public class ClientService : IClientService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IZoomService _zoomService;
 
-        public ClientService(IUnitOfWork unitOfWork)
+        public ClientService(IUnitOfWork unitOfWork, IZoomService zoomService   )
         {
             _unitOfWork = unitOfWork;
+            _zoomService = zoomService;
         }
 
         public long CreateBooking(BookingDTO request)
@@ -85,7 +87,7 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
         }
 
 
-        public int CreatePayment(PaymentDto request)
+        public async Task<int> CreatePaymentAsync(PaymentDto request)
         {
             var result = _unitOfWork.GetRepository<Payments>().FirstOrDefult(p => p.BookingId == request.BookingId);
             if (result != null)
@@ -102,6 +104,81 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
                 PaymentMethod = request.PaymentMethod
             };
             _unitOfWork.GetRepository<Payments>().Add(payment);
+            // Create & Add Zoom Link
+            string status = "";
+            var booking = _unitOfWork.GetRepository<Bookings>()
+                .FirstOrDefult(b => b.BookingId == request.BookingId);
+
+            if (booking == null)
+                throw new Exception("Booking not found.");
+
+            // 2️⃣ Get the service ID for that slot
+            var slot = _unitOfWork.GetRepository<AvailabilitySlots>()
+                .FirstOrDefult(a => a.AvailabilitySlotId == booking.AvailabilitySlotId);
+
+            if (slot == null)
+                throw new Exception("Availability slot not found.");
+
+            // 3️⃣ Get the CreatedByUserId for that service
+            var service = _unitOfWork.GetRepository<RefugeeSkillsPlatform.Core.Entities.Services>()
+                .FirstOrDefult(s => s.ServiceId == slot.ServiceId);
+
+            if (service == null)
+                throw new Exception("Service not found.");
+
+            var createdByUserId = service.CreatedByUserId;
+
+
+
+            if (createdByUserId == 0)
+            {
+                status = "Provider not found.";
+            }
+            else
+            {
+                var profile = _unitOfWork.GetRepository<Users>().FirstOrDefult(u => u.UserId == createdByUserId);
+                if (profile == null)
+                    status = "Provider not found.";
+                else if (profile.RoleId != 4002)
+                    status = "Only providers can host Zoom meetings.";
+                else if (!profile.IsApproved)
+                    status = "Provider account is not approved to create Zoom meetings.";
+                var exist = await _zoomService.GetUserZoomAccountAsync(createdByUserId);
+                if (exist == null)
+                    status = "No Zoom account linked for the provider.";
+                else if (exist.TokenExpiresAt <= DateTime.UtcNow)
+                {
+                    await _zoomService.RefreshAccessTokenAsync(createdByUserId);
+                }
+                ZoomMeetingRequest zoomMeetingRequest = new ZoomMeetingRequest
+                {
+                    Topic = "Meeting for Booking ID: " + request.BookingId,
+                    StartTime = DateTime.Today.Add(booking.BookingStart),
+                    Duration = 30,
+                    ZoomPassword = false
+                };
+                var meeting = await _zoomService.CreateMeetingAsync(createdByUserId, zoomMeetingRequest);
+                status = meeting != null ? "Zoom meeting created successfully." : "Failed to create Zoom meeting.";
+                if (meeting != null)
+                {
+                    booking.ZoomLink = meeting.JoinUrl;
+                    booking.ZoomStatus = "Zoom Link Generated";
+                    
+                }
+                else
+                {
+                    booking.ZoomStatus = status;
+                }
+
+
+            }
+            _unitOfWork.GetRepository<Bookings>().Update(booking);
+
+
+
+
+
+
             return _unitOfWork.Commit();
         }
 

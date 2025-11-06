@@ -93,9 +93,9 @@ namespace RefugeeSkillsPlatform.WebApi.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreatePayment(PaymentDto request)
+        public async Task<IActionResult> CreatePayment(PaymentDto request)
         {
-            if (_clientService.CreatePayment(request) == 0)
+            if (await _clientService.CreatePaymentAsync(request) == 0)
             {
                 return Ok(new StandardRequestResponse<int>()
                 {
