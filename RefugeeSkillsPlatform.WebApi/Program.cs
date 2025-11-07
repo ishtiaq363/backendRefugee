@@ -25,6 +25,8 @@ builder.Services.AddScoped<IDeliveryMethodsService, DeliveryMethodsService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProviderService, ProviderService>();
 builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddHttpClient<IZoomNewService, ZoomNewService>();
+
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 builder.Services.AddScoped<IZoomService, ZoomService>();

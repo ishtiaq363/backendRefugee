@@ -13,15 +13,22 @@ using System.Threading.Tasks;
 
 namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 {
+    public class MeetingRequest
+    {
+        public string Topic { get; set; }
+        public DateTime StartTime { get; set; }
+    }
     public class ClientService : IClientService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IZoomService _zoomService;
+        private readonly IZoomNewService _zoomNewService;
 
-        public ClientService(IUnitOfWork unitOfWork, IZoomService zoomService   )
+        public ClientService(IUnitOfWork unitOfWork, IZoomService zoomService , IZoomNewService zoomNewService )
         {
             _unitOfWork = unitOfWork;
             _zoomService = zoomService;
+            _zoomNewService = zoomNewService;
         }
 
         public long CreateBooking(BookingDTO request)
@@ -136,32 +143,12 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             }
             else
             {
-                var profile = _unitOfWork.GetRepository<Users>().FirstOrDefult(u => u.UserId == createdByUserId);
-                if (profile == null)
-                    status = "Provider not found.";
-                else if (profile.RoleId != 4002)
-                    status = "Only providers can host Zoom meetings.";
-                else if (!profile.IsApproved)
-                    status = "Provider account is not approved to create Zoom meetings.";
-                var exist = await _zoomService.GetUserZoomAccountAsync(createdByUserId);
-                if (exist == null)
-                    status = "No Zoom account linked for the provider.";
-                else if (exist.TokenExpiresAt <= DateTime.UtcNow)
+                var meetingUrl = await _zoomNewService.CreateMeetingAsync(service?.ServiceName?.ToString(), booking.SlotStartDate);
+
+                
+                if (meetingUrl != null)
                 {
-                    await _zoomService.RefreshAccessTokenAsync(createdByUserId);
-                }
-                ZoomMeetingRequest zoomMeetingRequest = new ZoomMeetingRequest
-                {
-                    Topic = "Meeting for Booking ID: " + request.BookingId,
-                    StartTime = DateTime.Today.Add(booking.BookingStart),
-                    Duration = 30,
-                    ZoomPassword = false
-                };
-                var meeting = await _zoomService.CreateMeetingAsync(createdByUserId, zoomMeetingRequest);
-                status = meeting != null ? "Zoom meeting created successfully." : "Failed to create Zoom meeting.";
-                if (meeting != null)
-                {
-                    booking.ZoomLink = meeting.JoinUrl;
+                    booking.ZoomLink = meetingUrl;
                     booking.ZoomStatus = "Zoom Link Generated";
                     
                 }
@@ -181,6 +168,101 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
 
             return _unitOfWork.Commit();
         }
+
+        //public async Task<int> CreatePaymentAsync(PaymentDto request)
+        //{
+        //    var result = _unitOfWork.GetRepository<Payments>().FirstOrDefult(p => p.BookingId == request.BookingId);
+        //    if (result != null)
+        //    {
+        //        return 0;
+        //    }
+        //    var payment = new Payments()
+        //    {
+        //        BookingId = request.BookingId,
+        //        Amount = request.Amount,
+        //        PaymentDate = request.PaymentDate,
+        //        PaymentStatus = "Paid",
+        //        TransactionReference = request.TransactionReference,
+        //        PaymentMethod = request.PaymentMethod
+        //    };
+        //    _unitOfWork.GetRepository<Payments>().Add(payment);
+        //    // Create & Add Zoom Link
+        //    string status = "";
+        //    var booking = _unitOfWork.GetRepository<Bookings>()
+        //        .FirstOrDefult(b => b.BookingId == request.BookingId);
+
+        //    if (booking == null)
+        //        throw new Exception("Booking not found.");
+
+        //    // 2️⃣ Get the service ID for that slot
+        //    var slot = _unitOfWork.GetRepository<AvailabilitySlots>()
+        //        .FirstOrDefult(a => a.AvailabilitySlotId == booking.AvailabilitySlotId);
+
+        //    if (slot == null)
+        //        throw new Exception("Availability slot not found.");
+
+        //    // 3️⃣ Get the CreatedByUserId for that service
+        //    var service = _unitOfWork.GetRepository<RefugeeSkillsPlatform.Core.Entities.Services>()
+        //        .FirstOrDefult(s => s.ServiceId == slot.ServiceId);
+
+        //    if (service == null)
+        //        throw new Exception("Service not found.");
+
+        //    var createdByUserId = service.CreatedByUserId;
+
+
+
+        //    if (createdByUserId == 0)
+        //    {
+        //        status = "Provider not found.";
+        //    }
+        //    else
+        //    {
+        //        var profile = _unitOfWork.GetRepository<Users>().FirstOrDefult(u => u.UserId == createdByUserId);
+        //        if (profile == null)
+        //            status = "Provider not found.";
+        //        else if (profile.RoleId != 4002)
+        //            status = "Only providers can host Zoom meetings.";
+        //        else if (!profile.IsApproved)
+        //            status = "Provider account is not approved to create Zoom meetings.";
+        //        var exist = await _zoomService.GetUserZoomAccountAsync(createdByUserId);
+        //        if (exist == null)
+        //            status = "No Zoom account linked for the provider.";
+        //        else if (exist.TokenExpiresAt <= DateTime.UtcNow)
+        //        {
+        //            await _zoomService.RefreshAccessTokenAsync(createdByUserId);
+        //        }
+        //        ZoomMeetingRequest zoomMeetingRequest = new ZoomMeetingRequest
+        //        {
+        //            Topic = "Meeting for Booking ID: " + request.BookingId,
+        //            StartTime = DateTime.Today.Add(booking.BookingStart),
+        //            Duration = 30,
+        //            ZoomPassword = false
+        //        };
+        //        var meeting = await _zoomService.CreateMeetingAsync(createdByUserId, zoomMeetingRequest);
+        //        status = meeting != null ? "Zoom meeting created successfully." : "Failed to create Zoom meeting.";
+        //        if (meeting != null)
+        //        {
+        //            booking.ZoomLink = meeting.JoinUrl;
+        //            booking.ZoomStatus = "Zoom Link Generated";
+
+        //        }
+        //        else
+        //        {
+        //            booking.ZoomStatus = status;
+        //        }
+
+
+        //    }
+        //    _unitOfWork.GetRepository<Bookings>().Update(booking);
+
+
+
+
+
+
+        //    return _unitOfWork.Commit();
+        //}
 
         public List<BookedSlotResponse> GetBookedSlots(int availabilitySlotId, DateTime date)
         {
@@ -272,4 +354,6 @@ namespace RefugeeSkillsPlatform.Infrastructure.Repositories.Services
             return services.Any() ? services : new List<ServiceResponse>();
         }
     }
+
+
 }
